@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daus Tik - TikTok Downloader</title>
+    <!-- Ganti href="favicon.png" sesuai dengan nama file yang Anda upload -->
+    <!-- Jika filenya .png -->
+<link rel="icon" href="favicon.png" type="image/png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Daus Tik</h1>
+        
+        <div class="input-group">
+            <input type="text" id="tiktokUrl" placeholder="Tempel link TikTok di sini...">
+            <button id="btnPaste" onclick="pasteLink()">Tempel Link</button>
+            <button onclick="processTikTok()">Cari</button>
+        </div>
+
+        <!-- Indikator Loading -->
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Mencari thumbnail & data postingan...</p>
+        </div>
+
+        <!-- Area Hasil -->
+        <div id="result" class="hidden">
+            <h3 id="authorName"></h3>
+            <p id="videoTitle"></p>
+            
+            <!-- Thumbnail Video / Preview Slide Gambar -->
+            <div id="mediaPreview"></div>
+
+            <!-- Tombol Download Video/Audio -->
+            <div id="actionButtons" class="download-buttons">
+                <a id="btnNoWm" href="#" target="_blank" class="btn">Download Tanpa Watermark</a>
+                <a id="btnWm" href="#" target="_blank" class="btn">Download Dengan Watermark</a>
+                <a id="btnAudio" href="#" target="_blank" class="btn btn-audio">Download MP3 Only</a>
+            </div>
+
+            <!-- Container Khusus Jika Konten Berupa Slide Foto -->
+            <div id="slideContainer" class="slide-grid"></div>
+        </div>
+
+        <footer>
+            Dibuat oleh Daus Dopo
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
