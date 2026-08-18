@@ -12,11 +12,31 @@ async function pasteLink() {
 function disableBrowserDefaultOnImages() {
     const images = document.querySelectorAll('#mediaPreview img, .slide-item img');
     images.forEach(img => {
-        // Blokir Klik Kanan
         img.addEventListener('contextmenu', (e) => e.preventDefault());
-        // Blokir Drag Gambar
         img.addEventListener('dragstart', (e) => e.preventDefault());
     });
+}
+
+// Fungsi Utama: Mengunduh File Secara Paksa (Force Direct Download via Blob)
+async function downloadFile(fileUrl, fileName) {
+    try {
+        const response = await fetch(fileUrl);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        const tempAnchor = document.createElement('a');
+        tempAnchor.href = blobUrl;
+        tempAnchor.download = fileName;
+        document.body.appendChild(tempAnchor);
+        tempAnchor.click();
+        
+        // Hapus elemen sementara setelah unduhan dimulai
+        document.body.removeChild(tempAnchor);
+        window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+        // Fallback jika terkena pembatasan CORS dari server asal
+        window.open(fileUrl, '_blank');
+    }
 }
 
 // Proses Mengambil Data dari Tikwm API
@@ -53,38 +73,57 @@ async function processTikTok() {
 
             // Jika Postingan Berupa Slide Foto
             if (data.images && data.images.length > 0) {
-                actionButtons.classList.add('hidden'); // Sembunyikan tombol video utama
+                actionButtons.classList.add('hidden');
                 
                 data.images.forEach((imgUrl, index) => {
-                    // Jika API menyediakan gambar watermark terpisah, gunakan data.wm_images[index] jika ada, jika tidak gunakan url gambar
                     const wmImgUrl = (data.wm_images && data.wm_images[index]) ? data.wm_images[index] : imgUrl;
 
                     const item = document.createElement('div');
                     item.className = 'slide-item';
-                    item.innerHTML = `
-                        <img src="${imgUrl}" alt="Slide ${index + 1}">
-                        <a href="${imgUrl}" target="_blank" class="btn-slide-nowm" download>Tanpa Watermark</a>
-                        <a href="${wmImgUrl}" target="_blank" class="btn-slide-wm" download>Dengan Watermark</a>
-                    `;
+                    
+                    const img = document.createElement('img');
+                    img.src = imgUrl;
+                    img.alt = `Slide ${index + 1}`;
+
+                    const btnNoWm = document.createElement('button');
+                    btnNoWm.className = 'btn-slide-nowm';
+                    btnNoWm.innerText = 'Tanpa Watermark';
+                    btnNoWm.onclick = () => downloadFile(imgUrl, `daustik_slide_${index + 1}.jpeg`);
+
+                    const btnWm = document.createElement('button');
+                    btnWm.className = 'btn-slide-wm';
+                    btnWm.innerText = 'Dengan Watermark';
+                    btnWm.onclick = () => downloadFile(wmImgUrl, `daustik_slide_wm_${index + 1}.jpeg`);
+
+                    item.appendChild(img);
+                    item.appendChild(btnNoWm);
+                    item.appendChild(btnWm);
                     slideContainer.appendChild(item);
                 });
             } 
             // Jika Postingan Berupa Video
             else {
                 actionButtons.classList.remove('hidden');
-                
-                // Tampilkan Thumbnail Video
                 mediaPreview.innerHTML = `<img src="${data.cover}" alt="Thumbnail">`;
 
-                // Set Link Download
-                document.getElementById('btnNoWm').href = data.play;
-                document.getElementById('btnWm').href = data.wmplay;
-                document.getElementById('btnAudio').href = data.music;
+                // Set Handler Klik Tombol Video
+                document.getElementById('btnNoWm').onclick = (e) => {
+                    e.preventDefault();
+                    downloadFile(data.play, 'daustik_video_nowm.mp4');
+                };
+
+                document.getElementById('btnWm').onclick = (e) => {
+                    e.preventDefault();
+                    downloadFile(data.wmplay, 'daustik_video_wm.mp4');
+                };
+
+                document.getElementById('btnAudio').onclick = (e) => {
+                    e.preventDefault();
+                    downloadFile(data.music, 'daustik_audio.mp3');
+                };
             }
 
             result.classList.remove('hidden');
-
-            // Jalankan pemblokiran bawaan browser pada thumbnail yang baru dibuat
             disableBrowserDefaultOnImages();
 
         } else {
