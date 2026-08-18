@@ -17,6 +17,17 @@ function disableBrowserDefaultOnImages() {
     });
 }
 
+// Format Nama File: [Daus Tik] - [Judul Postingan]
+function generateFileName(title, suffix, extension) {
+    // Membersihkan karakter khusus yang tidak valid untuk nama file
+    const cleanTitle = (title || 'TikTok')
+        .replace(/[/\\?%*:|"<>]/g, '')
+        .trim()
+        .substring(0, 50); // Membatasi panjang nama agar tidak terlalu panjang
+
+    return `Daus Tik - ${cleanTitle}${suffix}.${extension}`;
+}
+
 // Fungsi Utama: Mengunduh File Secara Paksa (Force Direct Download via Blob)
 async function downloadFile(fileUrl, fileName) {
     try {
@@ -30,11 +41,10 @@ async function downloadFile(fileUrl, fileName) {
         document.body.appendChild(tempAnchor);
         tempAnchor.click();
         
-        // Hapus elemen sementara setelah unduhan dimulai
         document.body.removeChild(tempAnchor);
         window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-        // Fallback jika terkena pembatasan CORS dari server asal
+        // Fallback jika terkena pembatasan CORS
         window.open(fileUrl, '_blank');
     }
 }
@@ -67,15 +77,17 @@ async function processTikTok() {
 
         if (res.code === 0) {
             const data = res.data;
+            const videoTitle = data.title || 'Postingan TikTok';
 
             document.getElementById('authorName').innerText = `@${data.author.unique_id}`;
-            document.getElementById('videoTitle').innerText = data.title || 'Tanpa Judul';
+            document.getElementById('videoTitle').innerText = videoTitle;
 
             // Jika Postingan Berupa Slide Foto
             if (data.images && data.images.length > 0) {
                 actionButtons.classList.add('hidden');
                 
                 data.images.forEach((imgUrl, index) => {
+                    // Ambil URL watermark asli dari array wm_images (jika tersedia dari API)
                     const wmImgUrl = (data.wm_images && data.wm_images[index]) ? data.wm_images[index] : imgUrl;
 
                     const item = document.createElement('div');
@@ -88,12 +100,18 @@ async function processTikTok() {
                     const btnNoWm = document.createElement('button');
                     btnNoWm.className = 'btn-slide-nowm';
                     btnNoWm.innerText = 'Tanpa Watermark';
-                    btnNoWm.onclick = () => downloadFile(imgUrl, `daustik_slide_${index + 1}.jpeg`);
+                    btnNoWm.onclick = () => {
+                        const fileName = generateFileName(videoTitle, `_Slide_${index + 1}`, 'jpeg');
+                        downloadFile(imgUrl, fileName);
+                    };
 
                     const btnWm = document.createElement('button');
                     btnWm.className = 'btn-slide-wm';
                     btnWm.innerText = 'Dengan Watermark';
-                    btnWm.onclick = () => downloadFile(wmImgUrl, `daustik_slide_wm_${index + 1}.jpeg`);
+                    btnWm.onclick = () => {
+                        const fileName = generateFileName(videoTitle, `_Slide_${index + 1}_WM`, 'jpeg');
+                        downloadFile(wmImgUrl, fileName);
+                    };
 
                     item.appendChild(img);
                     item.appendChild(btnNoWm);
@@ -106,20 +124,25 @@ async function processTikTok() {
                 actionButtons.classList.remove('hidden');
                 mediaPreview.innerHTML = `<img src="${data.cover}" alt="Thumbnail">`;
 
-                // Set Handler Klik Tombol Video
+                // Tombol Download Video Tanpa Watermark
                 document.getElementById('btnNoWm').onclick = (e) => {
                     e.preventDefault();
-                    downloadFile(data.play, 'daustik_video_nowm.mp4');
+                    const fileName = generateFileName(videoTitle, '_NoWM', 'mp4');
+                    downloadFile(data.play, fileName);
                 };
 
+                // Tombol Download Video Dengan Watermark
                 document.getElementById('btnWm').onclick = (e) => {
                     e.preventDefault();
-                    downloadFile(data.wmplay, 'daustik_video_wm.mp4');
+                    const fileName = generateFileName(videoTitle, '_WM', 'mp4');
+                    downloadFile(data.wmplay, fileName);
                 };
 
+                // Tombol Download Audio MP3
                 document.getElementById('btnAudio').onclick = (e) => {
                     e.preventDefault();
-                    downloadFile(data.music, 'daustik_audio.mp3');
+                    const fileName = generateFileName(videoTitle, '_Audio', 'mp3');
+                    downloadFile(data.music, fileName);
                 };
             }
 
