@@ -1,38 +1,9 @@
-let currentSlideIndex = 0;
-let totalSlides = 0;
+// ... (Bagian fungsi pasteLink, disableBrowserDefaultOnImages, generateFileName, downloadFile biarkan sama seperti sebelumnya) ...
 
-// Fitur Tempel Link dari Clipboard
-async function pasteLink() {
-    try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById('tiktokUrl').value = text;
-    } catch (err) {
-        alert('Gagal menempel link secara otomatis. Silakan tempel manual.');
-    }
-}
-
-// Fungsi Memblokir Klik Kanan dan Drag Gambar
-function disableBrowserDefaultOnImages() {
-    const images = document.querySelectorAll('#mediaPreview img, .slide-item img');
-    images.forEach(img => {
-        img.addEventListener('contextmenu', (e) => e.preventDefault());
-        img.addEventListener('dragstart', (e) => e.preventDefault());
-    });
-}
-
-// Format Nama File
-function generateFileName(title, suffix, extension) {
-    const cleanTitle = (title || 'TikTok')
-        .replace(/[/\\?%*:|"<>]/g, '')
-        .trim()
-        .substring(0, 50);
-
-    return `Daus Tik - ${cleanTitle}${suffix}.${extension}`;
-}
-
-// Fungsi Unduh Langsung via Blob
+// Pastikan fungsi downloadFile tetap seperti ini
 async function downloadFile(fileUrl, fileName) {
     try {
+        // Gunakan metode fetch langsung untuk memicu download
         const response = await fetch(fileUrl);
         const blob = await response.blob();
         const blobUrl = window.URL.createObjectURL(blob);
@@ -46,61 +17,18 @@ async function downloadFile(fileUrl, fileName) {
         document.body.removeChild(tempAnchor);
         window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
+        // Fallback jika terjadi kendala CORS
         window.open(fileUrl, '_blank');
     }
 }
 
-// Navigasi Slide (Next / Prev)
-function changeSlide(direction) {
-    const slides = document.querySelectorAll('.slide-item');
-    if (slides.length === 0) return;
-
-    // Sembunyikan slide aktif saat ini
-    slides[currentSlideIndex].classList.remove('active');
-
-    // Hitung indeks baru
-    currentSlideIndex += direction;
-
-    // Tampilkan slide baru
-    slides[currentSlideIndex].classList.add('active');
-
-    // Perbarui Tombol Navigasi & Indikator
-    updateCarouselControls();
-}
-
-// Mengatur Kondisi Tombol Next & Prev
-function updateCarouselControls() {
-    const btnPrev = document.getElementById('btnPrev');
-    const btnNext = document.getElementById('btnNext');
-    const counter = document.getElementById('slideCounter');
-
-    if (counter) {
-        counter.innerText = `${currentSlideIndex + 1} / ${totalSlides}`;
-    }
-
-    // Jika Slide Pertama
-    if (currentSlideIndex === 0) {
-        if (btnPrev) btnPrev.style.display = 'none';
-        if (btnNext) btnNext.style.display = totalSlides > 1 ? 'inline-block' : 'none';
-    } 
-    // Jika Slide Terakhir
-    else if (currentSlideIndex === totalSlides - 1) {
-        if (btnPrev) btnPrev.style.display = 'inline-block';
-        if (btnNext) btnNext.style.display = 'none';
-    } 
-    // Jika Slide di Tengah
-    else {
-        if (btnPrev) btnPrev.style.display = 'inline-block';
-        if (btnNext) btnNext.style.display = 'inline-block';
-    }
-}
+// ... (Bagian updateCarouselControls biarkan sama) ...
 
 // Proses Mengambil Data dari Tikwm API
 async function processTikTok() {
     const urlInput = document.getElementById('tiktokUrl').value.trim();
     const loading = document.getElementById('loading');
     const result = document.getElementById('result');
-    const mediaPreview = document.getElementById('mediaPreview');
     const slideContainer = document.getElementById('slideContainer');
     const actionButtons = document.getElementById('actionButtons');
 
@@ -113,9 +41,7 @@ async function processTikTok() {
     loading.classList.remove('hidden');
     result.classList.add('hidden');
     slideContainer.innerHTML = '';
-    mediaPreview.innerHTML = '';
-    currentSlideIndex = 0;
-
+    
     try {
         const response = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(urlInput)}`);
         const res = await response.json();
@@ -138,33 +64,30 @@ async function processTikTok() {
                 carouselWrapper.className = 'carousel-container';
 
                 data.images.forEach((imgUrl, index) => {
+                    // MENGAMBIL WATERMARK: Gunakan array wm_images dari API
                     const wmImgUrl = (data.wm_images && data.wm_images[index]) ? data.wm_images[index] : imgUrl;
 
                     const item = document.createElement('div');
                     item.className = `slide-item ${index === 0 ? 'active' : ''}`;
                     
                     const img = document.createElement('img');
-                    img.src = imgUrl;
+                    img.src = imgUrl; // Preview tetap pakai original agar loading cepat
                     img.alt = `Slide ${index + 1}`;
 
                     const actions = document.createElement('div');
                     actions.className = 'slide-actions';
 
+                    // Tombol Tanpa Watermark
                     const btnNoWm = document.createElement('button');
                     btnNoWm.className = 'btn-slide-nowm';
                     btnNoWm.innerText = 'Tanpa Watermark';
-                    btnNoWm.onclick = () => {
-                        const fileName = generateFileName(videoTitle, `_Slide_${index + 1}`, 'jpeg');
-                        downloadFile(imgUrl, fileName);
-                    };
+                    btnNoWm.onclick = () => downloadFile(imgUrl, generateFileName(videoTitle, `_Slide_${index + 1}`, 'jpeg'));
 
+                    // Tombol Dengan Watermark (Pastikan menggunakan wmImgUrl)
                     const btnWm = document.createElement('button');
                     btnWm.className = 'btn-slide-wm';
                     btnWm.innerText = 'Dengan Watermark';
-                    btnWm.onclick = () => {
-                        const fileName = generateFileName(videoTitle, `_Slide_${index + 1}_WM`, 'jpeg');
-                        downloadFile(wmImgUrl, fileName);
-                    };
+                    btnWm.onclick = () => downloadFile(wmImgUrl, generateFileName(videoTitle, `_Slide_${index + 1}_WM`, 'jpeg'));
 
                     actions.appendChild(btnNoWm);
                     actions.appendChild(btnWm);
@@ -173,43 +96,26 @@ async function processTikTok() {
                     carouselWrapper.appendChild(item);
                 });
 
-                // Kontrol Navigasi Carousel
-                const nav = document.createElement('div');
-                nav.className = 'carousel-nav';
-                nav.innerHTML = `
-                    <button id="btnPrev" class="btn-nav" onclick="changeSlide(-1)">Prev</button>
-                    <span id="slideCounter" class="slide-counter">1 / ${totalSlides}</span>
-                    <button id="btnNext" class="btn-nav" onclick="changeSlide(1)">Next</button>
-                `;
-
+                // ... (Sisanya tambahkan navigasi Prev/Next seperti kode sebelumnya) ...
                 slideContainer.appendChild(carouselWrapper);
-                slideContainer.appendChild(nav);
-
-                // Set kondisi tombol pertama kali
-                updateCarouselControls();
             } 
             // Jika Postingan Berupa Video
             else {
                 actionButtons.classList.remove('hidden');
-                mediaPreview.innerHTML = `<img src="${data.cover}" alt="Thumbnail">`;
+                document.getElementById('mediaPreview').innerHTML = `<img src="${data.cover}" alt="Thumbnail">`;
 
+                // TOMBOL VIDEO WATERMARK: Menggunakan data.wmplay
                 document.getElementById('btnNoWm').onclick = (e) => {
                     e.preventDefault();
-                    const fileName = generateFileName(videoTitle, '_NoWM', 'mp4');
-                    downloadFile(data.play, fileName);
+                    downloadFile(data.play, generateFileName(videoTitle, '_NoWM', 'mp4'));
                 };
 
                 document.getElementById('btnWm').onclick = (e) => {
                     e.preventDefault();
-                    const fileName = generateFileName(videoTitle, '_WM', 'mp4');
-                    downloadFile(data.wmplay, fileName);
+                    downloadFile(data.wmplay, generateFileName(videoTitle, '_WM', 'mp4'));
                 };
-
-                document.getElementById('btnAudio').onclick = (e) => {
-                    e.preventDefault();
-                    const fileName = generateFileName(videoTitle, '_Audio', 'mp3');
-                    downloadFile(data.music, fileName);
-                };
+                
+                // ... (sisanya sama untuk audio)
             }
 
             result.classList.remove('hidden');
@@ -220,6 +126,6 @@ async function processTikTok() {
         }
     } catch (error) {
         loading.classList.add('hidden');
-        alert('Terjadi kesalahan jaringan atau API.');
+        alert('Terjadi kesalahan koneksi.');
     }
 }
