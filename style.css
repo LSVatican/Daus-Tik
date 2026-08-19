@@ -158,3 +158,65 @@ footer {
     border-top: 1px solid #333;
     padding-top: 15px;
 }
+
+/* Layout Carousel Slide */
+.carousel-container {
+    position: relative;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.slide-item {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    display: none; /* Disembunyikan secara bawaan */
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.slide-item.active {
+    display: flex; /* Hanya slide aktif yang tampil */
+}
+
+.slide-item img {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 6px;
+}
+
+/* Navigasi Tombol Prev & Next */
+.carousel-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    gap: 10px;
+}
+
+.btn-nav {
+    background: #333;
+    color: #fff;
+    padding: 8px 16px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-nav:hover {
+    background: #444;
+}
+
+.slide-counter {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.slide-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+}
