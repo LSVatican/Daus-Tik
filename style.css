@@ -187,3 +187,27 @@ body {
 .btn-tiktok:active {
   opacity: 0.8;
 }
+
+/* Styling Tambahan Info Pemilik Postingan */
+.author-info {
+  background: #111111;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-left: 4px solid #fe2c55;
+  text-align: left;
+}
+
+.author-username {
+  color: #25f4ee;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.post-title {
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+}

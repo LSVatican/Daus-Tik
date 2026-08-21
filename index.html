@@ -4,10 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daus Tik</title>
-  <!-- Favicon dari URL Gambar -->
   <link rel="icon" href="/favicon.png" type="image/png">
   <link rel="stylesheet" href="style.css">
-  <!-- FontAwesome untuk Icon -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -34,6 +32,13 @@
 
     <!-- Preview Media & Actions -->
     <div id="resultContainer" class="result-container hidden">
+      
+      <!-- Info Pemilik & Nama Postingan -->
+      <div class="author-info">
+        <p id="authorUsername" class="author-username">@username</p>
+        <p id="postTitle" class="post-title">Nama postingan...</p>
+      </div>
+
       <div class="media-preview-wrapper" oncontextmenu="return false;">
         <!-- Single Preview -->
         <div id="singlePreview" class="preview-box"></div>

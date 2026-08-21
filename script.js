@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const loading = document.getElementById('loading');
   const resultContainer = document.getElementById('resultContainer');
   
+  const authorUsername = document.getElementById('authorUsername');
+  const postTitle = document.getElementById('postTitle');
+
   const singlePreview = document.getElementById('singlePreview');
   const slidePreview = document.getElementById('slidePreview');
   const slideContent = document.getElementById('slideContent');
@@ -18,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentSlides = [];
   let currentSlideIndex = 0;
-  let mediaData = { noWatermark: '', watermark: '', music: '' };
+  let mediaData = { noWatermark: '', watermark: '', music: '', title: '' };
 
   // Fitur Tempel Link
   pasteBtn.addEventListener('click', async () => {
@@ -49,6 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
         mediaData.noWatermark = data.play;
         mediaData.watermark = data.wmplay;
         mediaData.music = data.music;
+        mediaData.title = data.title || 'Postingan TikTok';
+
+        // Tampilkan Username & Judul Postingan
+        authorUsername.textContent = `@${data.author.unique_id || data.author.nickname}`;
+        postTitle.textContent = mediaData.title;
 
         // Cek tipe: Slide Gambar atau Video
         if (data.images && data.images.length > 0) {
@@ -83,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
     slideContent.innerHTML = `<img src="${currentSlides[currentSlideIndex]}" alt="Slide ${currentSlideIndex + 1}" oncontextmenu="return false;">`;
     slideCounter.textContent = `${currentSlideIndex + 1}/${currentSlides.length}`;
 
-    // Kontrol tombol Next & Prev
     if (currentSlideIndex === 0) {
       prevBtn.classList.add('hidden');
     } else {
@@ -111,8 +118,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Sistem Download Langsung (Tanpa Buka Tab Baru)
-  async function forceDownload(fileUrl, fileName) {
+  // Membersihkan Karakter Ilegal pada Nama File
+  function cleanFileName(text) {
+    return text.replace(/[/\\?%*:|"<>]/g, '').trim().substring(0, 50);
+  }
+
+  // Sistem Download Langsung
+  async function forceDownload(fileUrl, extension) {
+    const cleanTitle = cleanFileName(mediaData.title);
+    const fileName = `DausTik - ${cleanTitle}${extension}`;
+
     try {
       const response = await fetch(fileUrl);
       const blob = await response.blob();
@@ -125,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
-      // Fallback jika CORS memblokir blob
       const a = document.createElement('a');
       a.href = fileUrl;
       a.download = fileName;
@@ -137,21 +151,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   dlNoWm.addEventListener('click', () => {
     if (currentSlides.length > 0) {
-      forceDownload(currentSlides[currentSlideIndex], `DausTik_Slide_${currentSlideIndex + 1}.jpeg`);
+      forceDownload(currentSlides[currentSlideIndex], `_Slide_${currentSlideIndex + 1}.jpeg`);
     } else {
-      forceDownload(mediaData.noWatermark, 'DausTik_NoWatermark.mp4');
+      forceDownload(mediaData.noWatermark, '.mp4');
     }
   });
 
   dlWm.addEventListener('click', () => {
     if (currentSlides.length > 0) {
-      forceDownload(currentSlides[currentSlideIndex], `DausTik_Slide_${currentSlideIndex + 1}.jpeg`);
+      forceDownload(currentSlides[currentSlideIndex], `_Slide_${currentSlideIndex + 1}.jpeg`);
     } else {
-      forceDownload(mediaData.watermark, 'DausTik_Watermark.mp4');
+      forceDownload(mediaData.watermark, '.mp4');
     }
   });
 
   dlMp3.addEventListener('click', () => {
-    forceDownload(mediaData.music, 'DausTik_Audio.mp3');
+    forceDownload(mediaData.music, '.mp3');
   });
 });
