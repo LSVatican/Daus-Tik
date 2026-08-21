@@ -1,118 +1,157 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const pasteBtn = document.getElementById('paste-btn');
-    const processBtn = document.getElementById('process-btn');
-    const tiktokUrlInput = document.getElementById('tiktok-url');
-    
-    const loading = document.getElementById('loading');
-    const resultContainer = document.getElementById('result-container');
-    const mediaPreviewContainer = document.getElementById('media-preview-container');
-    const thumbnailPreview = document.getElementById('thumbnail-preview');
-    
-    const slideContainer = document.getElementById('slide-container');
-    const slideImg = document.getElementById('slide-img');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
+  const pasteBtn = document.getElementById('pasteBtn');
+  const tiktokUrl = document.getElementById('tiktokUrl');
+  const fetchBtn = document.getElementById('fetchBtn');
+  const loading = document.getElementById('loading');
+  const resultContainer = document.getElementById('resultContainer');
+  
+  const singlePreview = document.getElementById('singlePreview');
+  const slidePreview = document.getElementById('slidePreview');
+  const slideContent = document.getElementById('slideContent');
+  const slideCounter = document.getElementById('slideCounter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
 
-    const dlNoWatermark = document.getElementById('dl-nowatermark');
-    const dlWatermark = document.getElementById('dl-watermark');
-    const dlMp3 = document.getElementById('dl-mp3');
+  const dlNoWm = document.getElementById('dlNoWm');
+  const dlWm = document.getElementById('dlWm');
+  const dlMp3 = document.getElementById('dlMp3');
 
-    let slideImages = [];
-    let currentSlideIndex = 0;
+  let currentSlides = [];
+  let currentSlideIndex = 0;
+  let mediaData = { noWatermark: '', watermark: '', music: '' };
 
-    // Sistem Tempel Link
-    pasteBtn.addEventListener('click', async () => {
-        try {
-            const text = await navigator.clipboard.readText();
-            tiktokUrlInput.value = text;
-        } catch (err) {
-            alert('Gagal menempelkan link secara otomatis. Silakan tempel manual.');
-        }
-    });
+  // Fitur Tempel Link
+  pasteBtn.addEventListener('click', async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      tiktokUrl.value = text;
+    } catch (err) {
+      alert('Gagal menempelkan link secara otomatis.');
+    }
+  });
 
-    // Proses Pencarian Data TikTok
-    processBtn.addEventListener('click', async () => {
-        const url = tiktokUrlInput.value.trim();
-        if (!url) {
-            alert('Masukkan link TikTok terlebih dahulu!');
-            return;
-        }
+  // Ambil Data Tikwm API
+  fetchBtn.addEventListener('click', async () => {
+    const url = tiktokUrl.value.trim();
+    if (!url) return alert('Silakan masukkan link TikTok terlebih dahulu!');
 
-        loading.classList.remove('hidden');
-        resultContainer.classList.add('hidden');
-        slideContainer.classList.add('hidden');
-        mediaPreviewContainer.classList.add('hidden');
+    loading.classList.remove('hidden');
+    resultContainer.classList.add('hidden');
+    singlePreview.innerHTML = '';
+    slideContent.innerHTML = '';
 
-        try {
-            // Menggunakan API TikWM Publik
-            const response = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
-            const resData = await response.json();
+    try {
+      const response = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
+      const res = await response.json();
 
-            if (resData.code !== 0) {
-                alert('Gagal mengambil data TikTok. Pastikan link benar!');
-                loading.classList.add('hidden');
-                return;
-            }
+      if (res.code === 0) {
+        const data = res.data;
+        mediaData.noWatermark = data.play;
+        mediaData.watermark = data.wmplay;
+        mediaData.music = data.music;
 
-            const data = resData.data;
-
-            // Set Tombol Download
-            dlNoWatermark.href = data.play || '#';
-            dlWatermark.href = data.wmplay || data.play || '#';
-            dlMp3.href = data.music || '#';
-
-            // Cek Jika Tipe Media Adalah Slide Images
-            if (data.images && data.images.length > 0) {
-                slideImages = data.images;
-                currentSlideIndex = 0;
-                updateSlideView();
-                slideContainer.classList.remove('hidden');
-            } else {
-                // Tipe Video atau Foto Profil
-                thumbnailPreview.src = data.cover || data.origin_cover || data.author.avatar;
-                mediaPreviewContainer.classList.remove('hidden');
-            }
-
-            loading.classList.add('hidden');
-            resultContainer.classList.remove('hidden');
-
-        } catch (error) {
-            alert('Terjadi kesalahan koneksi atau data tidak ditemukan.');
-            loading.classList.add('hidden');
-        }
-    });
-
-    // Logika Pengaturan Slide Next & Prev
-    function updateSlideView() {
-        slideImg.src = slideImages[currentSlideIndex];
-
-        // Slide pertama hanya tampilkan Next, Slide terakhir hanya tampilkan Prev
-        if (slideImages.length <= 1) {
-            prevBtn.classList.add('hidden');
-            nextBtn.classList.add('hidden');
-        } else if (currentSlideIndex === 0) {
-            prevBtn.classList.add('hidden');
-            nextBtn.classList.remove('hidden');
-        } else if (currentSlideIndex === slideImages.length - 1) {
-            prevBtn.classList.remove('hidden');
-            nextBtn.classList.add('hidden');
+        // Cek tipe: Slide Gambar atau Video
+        if (data.images && data.images.length > 0) {
+          currentSlides = data.images;
+          currentSlideIndex = 0;
+          setupSlideSystem();
+          singlePreview.classList.add('hidden');
+          slidePreview.classList.remove('hidden');
         } else {
-            prevBtn.classList.remove('hidden');
-            nextBtn.classList.remove('hidden');
+          slidePreview.classList.add('hidden');
+          singlePreview.classList.remove('hidden');
+          singlePreview.innerHTML = `<img src="${data.cover}" alt="Thumbnail" oncontextmenu="return false;">`;
         }
+
+        resultContainer.classList.remove('hidden');
+      } else {
+        alert('Gagal mengambil data TikTok. Pastikan link valid!');
+      }
+    } catch (e) {
+      alert('Terjadi kesalahan jaringan/sistem.');
+    } finally {
+      loading.classList.add('hidden');
+    }
+  });
+
+  // System Slide Navigasi
+  function setupSlideSystem() {
+    updateSlideDisplay();
+  }
+
+  function updateSlideDisplay() {
+    slideContent.innerHTML = `<img src="${currentSlides[currentSlideIndex]}" alt="Slide ${currentSlideIndex + 1}" oncontextmenu="return false;">`;
+    slideCounter.textContent = `${currentSlideIndex + 1}/${currentSlides.length}`;
+
+    // Kontrol tombol Next & Prev
+    if (currentSlideIndex === 0) {
+      prevBtn.classList.add('hidden');
+    } else {
+      prevBtn.classList.remove('hidden');
     }
 
-    nextBtn.addEventListener('click', () => {
-        if (currentSlideIndex < slideImages.length - 1) {
-            currentSlideIndex++;
-            updateSlideView();
-        }
-    });
+    if (currentSlideIndex === currentSlides.length - 1) {
+      nextBtn.classList.add('hidden');
+    } else {
+      nextBtn.classList.remove('hidden');
+    }
+  }
 
-    prevBtn.addEventListener('click', () => {
-        if (currentSlideIndex > 0) {
-            currentSlideIndex--;
-            updateSlideView();
-        }
-    });
+  nextBtn.addEventListener('click', () => {
+    if (currentSlideIndex < currentSlides.length - 1) {
+      currentSlideIndex++;
+      updateSlideDisplay();
+    }
+  });
+
+  prevBtn.addEventListener('click', () => {
+    if (currentSlideIndex > 0) {
+      currentSlideIndex--;
+      updateSlideDisplay();
+    }
+  });
+
+  // Sistem Download Langsung (Tanpa Buka Tab Baru)
+  async function forceDownload(fileUrl, fileName) {
+    try {
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      // Fallback jika CORS memblokir blob
+      const a = document.createElement('a');
+      a.href = fileUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }
+
+  dlNoWm.addEventListener('click', () => {
+    if (currentSlides.length > 0) {
+      forceDownload(currentSlides[currentSlideIndex], `DausTik_Slide_${currentSlideIndex + 1}.jpeg`);
+    } else {
+      forceDownload(mediaData.noWatermark, 'DausTik_NoWatermark.mp4');
+    }
+  });
+
+  dlWm.addEventListener('click', () => {
+    if (currentSlides.length > 0) {
+      forceDownload(currentSlides[currentSlideIndex], `DausTik_Slide_${currentSlideIndex + 1}.jpeg`);
+    } else {
+      forceDownload(mediaData.watermark, 'DausTik_Watermark.mp4');
+    }
+  });
+
+  dlMp3.addEventListener('click', () => {
+    forceDownload(mediaData.music, 'DausTik_Audio.mp3');
+  });
 });

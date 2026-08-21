@@ -1,186 +1,189 @@
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-touch-callout: none;
 }
 
 body {
-    background-color: #000000;
-    color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
+  background-color: #000000;
+  color: #ffffff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
 }
 
-/* Animasi Stroke Pelangi */
+/* Animasi Pelangi */
 @keyframes rainbowBorder {
-    0% { border-color: #ff0000; box-shadow: 0 0 10px #ff0000; }
-    20% { border-color: #ff00ff; box-shadow: 0 0 10px #ff00ff; }
-    40% { border-color: #0000ff; box-shadow: 0 0 10px #0000ff; }
-    60% { border-color: #00ffff; box-shadow: 0 0 10px #00ffff; }
-    80% { border-color: #00ff00; box-shadow: 0 0 10px #00ff00; }
-    100% { border-color: #ff0000; box-shadow: 0 0 10px #ff0000; }
+  0% { border-color: #ff0000; box-shadow: 0 0 10px #ff0000; }
+  20% { border-color: #ff00d4; box-shadow: 0 0 10px #ff00d4; }
+  40% { border-color: #00d4ff; box-shadow: 0 0 10px #00d4ff; }
+  60% { border-color: #00ff2b; box-shadow: 0 0 10px #00ff2b; }
+  80% { border-color: #ffee00; box-shadow: 0 0 10px #ffee00; }
+  100% { border-color: #ff0000; box-shadow: 0 0 10px #ff0000; }
 }
 
-.rainbow-box {
-    border: 3px solid #ff0000;
-    animation: rainbowBorder 4s linear infinite;
-    border-radius: 12px;
-}
-
-.main-container {
-    background-color: #050505;
-    width: 100%;
-    max-width: 480px;
-    padding: 25px;
-    text-align: center;
-    position: relative;
+.main-card {
+  background-color: #000000;
+  width: 100%;
+  max-width: 480px;
+  padding: 25px;
+  border-radius: 16px;
+  border: 3px solid #ff0000;
+  animation: rainbowBorder 6s linear infinite;
+  text-align: center;
 }
 
 .title {
-    font-size: 26px;
-    margin-bottom: 8px;
-    color: #fff;
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
 }
 
-.instruction-text {
-    font-size: 12px;
-    color: #a0a0a0;
-    margin-bottom: 20px;
+.subtitle {
+  font-size: 12px;
+  color: #aaaaaa;
+  margin-bottom: 20px;
 }
 
-.input-wrapper {
-    display: flex;
-    align-items: center;
-    background-color: #121212;
-    padding: 5px 10px;
-    margin-bottom: 15px;
+.input-container {
+  display: flex;
+  align-items: center;
+  background: #111;
+  border: 2px solid #ff0000;
+  border-radius: 10px;
+  padding: 5px 10px;
+  animation: rainbowBorder 6s linear infinite;
+  margin-bottom: 8px;
 }
 
 .tiktok-icon {
-    font-size: 22px;
-    color: #25F4EE;
-    text-shadow: -2px 0 #FE2C55;
-    margin-right: 10px;
+  font-size: 20px;
+  color: #ee1d52;
+  margin-right: 10px;
 }
 
-.input-wrapper input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #fff;
-    padding: 10px 5px;
-    font-size: 14px;
+.input-container input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  padding: 8px 0;
+  font-size: 14px;
 }
 
-#paste-btn {
-    background: #252525;
-    border: none;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    white-space: nowrap;
+.btn-paste {
+  background: #25f4ee;
+  color: #000;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-#process-btn {
-    width: 100%;
-    padding: 12px;
-    background-color: #FE2C55;
-    border: none;
-    border-radius: 8px;
-    color: white;
-    font-weight: bold;
-    font-size: 15px;
-    cursor: pointer;
-    margin-bottom: 20px;
+.instruction-text {
+  font-size: 12px;
+  color: #fe2c55;
+  margin-bottom: 15px;
+  text-align: left;
 }
 
-/* Tombol Merah Khas TikTok Asli */
-.tiktok-btn {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    margin-top: 10px;
-    background-color: #FE2C55;
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: bold;
-    border-radius: 8px;
-    font-size: 14px;
-    border: none;
-    cursor: pointer;
-    text-align: center;
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #fe2c55;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
 }
 
-.tiktok-btn:hover {
-    background-color: #e02649;
-}
-
-/* Loading Spinner */
-#loading {
-    margin: 20px 0;
-}
-
-.spinner {
-    width: 35px;
-    height: 35px;
-    border: 4px solid #333;
-    border-top: 4px solid #FE2C55;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 10px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Media Preview & Slide */
-.preview-media, .slide-viewer img {
-    width: 100%;
-    max-height: 320px;
-    object-fit: contain;
-    border-radius: 8px;
-    background: #111;
-    margin-bottom: 15px;
-}
-
-/* Blokir aksi bawaan foto/video */
-.no-action {
-    pointer-events: none;
-    user-select: none;
-    -webkit-user-drag: none;
-}
-
-.slider-controls {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
-}
-
-.nav-btn {
-    background-color: #252525;
-    color: #fff;
-    border: 1px solid #444;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.watermark-label {
-    margin-top: 25px;
-    font-size: 12px;
-    color: #888;
-    font-style: italic;
+.loading-box {
+  margin-top: 20px;
+  color: #fe2c55;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .hidden {
-    display: none !important;
+  display: none !important;
+}
+
+/* Result & Media Styling */
+.result-container {
+  margin-top: 20px;
+}
+
+.media-preview-wrapper {
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: auto;
+}
+
+.preview-box img, .preview-box video {
+  width: 100%;
+  max-height: 350px;
+  object-fit: contain;
+  border-radius: 8px;
+  pointer-events: none; /* Blokir aksi bawaan drag/click */
+}
+
+.slide-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.btn-nav {
+  background: #fe2c55;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.slide-counter {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Merah Khas TikTok Asli */
+.download-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-tiktok {
+  background-color: #fe2c55;
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: opacity 0.2s;
+}
+
+.btn-tiktok:active {
+  opacity: 0.8;
 }
