@@ -3,33 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daus Tik - TikTok Downloader</title>
-    <!-- Ganti favicon.png dengan nama file gambar yang kamu upload -->
-    <link rel="icon" href="favicon.png" type="image/png">
+    <title>Daus Tik</title>
+    <link rel="icon" id="dynamic-favicon" type="image/png" href="/favicon.png">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Daus Tik</h1>
-        <div class="input-group">
-            <input type="text" id="tiktokUrl" placeholder="Tempel link TikTok di sini...">
-            <button onclick="pasteLink()">Tempel</button>
-            <button onclick="processTikTok()">Cari</button>
+
+    <div class="rainbow-box main-container">
+        <h1 class="title"><i class="fa-brands fa-tiktok"></i> Daus Tik</h1>
+        
+        <p class="instruction-text">
+            <i class="fa-solid fa-circle-info"></i> Berfungsi untuk Video, Slide Foto, dan Foto Profil TikTok
+        </p>
+
+        <div class="input-wrapper rainbow-box">
+            <i class="fa-brands fa-tiktok tiktok-icon"></i>
+            <input type="text" id="tiktok-url" placeholder="Tempelkan link TikTok di sini..." autocomplete="off">
+            <button id="paste-btn" type="button"><i class="fa-solid fa-paste"></i> Tempel</button>
         </div>
 
+        <button id="process-btn" type="button"><i class="fa-solid fa-magnifying-glass"></i> Cari Media</button>
+
+        <!-- Loading Indicator -->
         <div id="loading" class="hidden">
             <div class="spinner"></div>
-            <p>Sedang mengambil data...</p>
+            <p>Mencari thumbnail & data TikTok...</p>
         </div>
 
-        <div id="result" class="hidden">
-            <h3 id="authorName"></h3>
-            <p id="videoTitle"></p>
-            <div id="mediaArea"></div>
-            <div id="actionArea"></div>
+        <!-- Result Box -->
+        <div id="result-container" class="hidden">
+            
+            <!-- Video & Profile Preview -->
+            <div id="media-preview-container">
+                <img id="thumbnail-preview" src="" alt="Thumbnail TikTok" class="preview-media">
+            </div>
+
+            <!-- Slide Slider Container -->
+            <div id="slide-container" class="hidden">
+                <div class="slider-wrapper">
+                    <div id="slide-viewer" class="slide-viewer" oncontextmenu="return false;">
+                        <img id="slide-img" src="" alt="Slide TikTok" class="no-action">
+                    </div>
+                    <div class="slider-controls">
+                        <button id="prev-btn" class="nav-btn hidden"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+                        <button id="next-btn" class="nav-btn hidden">Next <i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="download-actions">
+                <a id="dl-nowatermark" href="#" target="_blank" class="tiktok-btn">
+                    <i class="fa-solid fa-download"></i> Download Tanpa Watermark
+                </a>
+                <a id="dl-watermark" href="#" target="_blank" class="tiktok-btn">
+                    <i class="fa-solid fa-file-video"></i> Download Dengan Watermark
+                </a>
+                <a id="dl-mp3" href="#" target="_blank" class="tiktok-btn">
+                    <i class="fa-solid fa-music"></i> Download MP3 Only
+                </a>
+            </div>
         </div>
-        <footer>Dibuat oleh Daus Dopo</footer>
+
+        <div class="watermark-label">Dibuat oleh Daus Dopo</div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>

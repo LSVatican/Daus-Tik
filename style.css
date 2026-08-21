@@ -1,17 +1,186 @@
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-body { background: #121212; color: #fff; display: flex; justify-content: center; padding: 20px; }
-.container { width: 100%; max-width: 450px; background: #1e1e1e; padding: 20px; border-radius: 12px; text-align: center; }
-h1 { color: #ff0050; margin-bottom: 20px; }
-.input-group { display: flex; gap: 5px; margin-bottom: 20px; }
-input { flex: 1; padding: 10px; border-radius: 5px; border: none; }
-button { padding: 10px 15px; border-radius: 5px; border: none; background: #00f2fe; cursor: pointer; font-weight: bold; }
-.hidden { display: none; }
-.spinner { border: 4px solid #333; border-top: 4px solid #00f2fe; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-.slide-item { display: none; }
-.slide-item.active { display: block; }
-.slide-item img { width: 100%; border-radius: 8px; margin-top: 10px; pointer-events: none; }
-.btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-.btn-dl { padding: 12px; background: #ff0050; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
-footer { margin-top: 30px; color: #666; font-size: 12px; }
-.nav-btn { display: inline-block; margin: 10px 5px; background: #444; color: white; }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #000000;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Animasi Stroke Pelangi */
+@keyframes rainbowBorder {
+    0% { border-color: #ff0000; box-shadow: 0 0 10px #ff0000; }
+    20% { border-color: #ff00ff; box-shadow: 0 0 10px #ff00ff; }
+    40% { border-color: #0000ff; box-shadow: 0 0 10px #0000ff; }
+    60% { border-color: #00ffff; box-shadow: 0 0 10px #00ffff; }
+    80% { border-color: #00ff00; box-shadow: 0 0 10px #00ff00; }
+    100% { border-color: #ff0000; box-shadow: 0 0 10px #ff0000; }
+}
+
+.rainbow-box {
+    border: 3px solid #ff0000;
+    animation: rainbowBorder 4s linear infinite;
+    border-radius: 12px;
+}
+
+.main-container {
+    background-color: #050505;
+    width: 100%;
+    max-width: 480px;
+    padding: 25px;
+    text-align: center;
+    position: relative;
+}
+
+.title {
+    font-size: 26px;
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+.instruction-text {
+    font-size: 12px;
+    color: #a0a0a0;
+    margin-bottom: 20px;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: #121212;
+    padding: 5px 10px;
+    margin-bottom: 15px;
+}
+
+.tiktok-icon {
+    font-size: 22px;
+    color: #25F4EE;
+    text-shadow: -2px 0 #FE2C55;
+    margin-right: 10px;
+}
+
+.input-wrapper input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    padding: 10px 5px;
+    font-size: 14px;
+}
+
+#paste-btn {
+    background: #252525;
+    border: none;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+#process-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #FE2C55;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+/* Tombol Merah Khas TikTok Asli */
+.tiktok-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background-color: #FE2C55;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 8px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+}
+
+.tiktok-btn:hover {
+    background-color: #e02649;
+}
+
+/* Loading Spinner */
+#loading {
+    margin: 20px 0;
+}
+
+.spinner {
+    width: 35px;
+    height: 35px;
+    border: 4px solid #333;
+    border-top: 4px solid #FE2C55;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Media Preview & Slide */
+.preview-media, .slide-viewer img {
+    width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #111;
+    margin-bottom: 15px;
+}
+
+/* Blokir aksi bawaan foto/video */
+.no-action {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.slider-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.nav-btn {
+    background-color: #252525;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.watermark-label {
+    margin-top: 25px;
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+}
+
+.hidden {
+    display: none !important;
+}
