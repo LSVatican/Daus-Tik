@@ -1,183 +1,102 @@
-let currentSlideIndex = 0;
-let totalSlides = 0;
+let currentSlide = 0;
+let slideData = [];
+let postTitle = "";
 
-// 1. Fitur Tempel Link
 async function pasteLink() {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('tiktokUrl').value = text;
+}
+
+async function downloadFile(url, fileName) {
     try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById('tiktokUrl').value = text;
-    } catch (err) {
-        alert('Gagal menempel link secara otomatis. Silakan tempel manual.');
-    }
-}
-
-// 2. Blokir Klik Kanan/Drag agar tidak bisa save as biasa (memaksa user pakai tombol)
-function disableBrowserDefaultOnImages() {
-    const images = document.querySelectorAll('#mediaPreview img, .slide-item img');
-    images.forEach(img => {
-        img.addEventListener('contextmenu', (e) => e.preventDefault());
-        img.addEventListener('dragstart', (e) => e.preventDefault());
-    });
-}
-
-// 3. Generator Nama File: Daus Tik - [Judul]
-function generateFileName(title, suffix, extension) {
-    const cleanTitle = (title || 'TikTok').replace(/[/\\?%*:|"<>]/g, '').trim().substring(0, 50);
-    return `Daus Tik - ${cleanTitle}${suffix}.${extension}`;
-}
-
-// 4. Engine Download Langsung (Force Download via Blob)
-async function downloadFile(fileUrl, fileName) {
-    try {
-        const response = await fetch(fileUrl);
+        const response = await fetch(url);
         const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        
-        const tempAnchor = document.createElement('a');
-        tempAnchor.href = blobUrl;
-        tempAnchor.download = fileName;
-        document.body.appendChild(tempAnchor);
-        tempAnchor.click();
-        
-        document.body.removeChild(tempAnchor);
-        window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-        // Fallback jika terjadi error CORS
-        window.open(fileUrl, '_blank');
-    }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Daus Tik - ${fileName.replace(/[/\\?%*:|"<>]/g, '')}.mp4`;
+        if (fileName.includes('.jpeg')) a.download = a.download.replace('.mp4', '.jpeg');
+        if (fileName.includes('.mp3')) a.download = a.download.replace('.mp4', '.mp3');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    } catch (e) { window.open(url, '_blank'); }
 }
 
-// 5. Navigasi Carousel (Slide)
-function changeSlide(direction) {
-    const slides = document.querySelectorAll('.slide-item');
-    if (slides.length === 0) return;
-
-    slides[currentSlideIndex].classList.remove('active');
-    currentSlideIndex += direction;
-    slides[currentSlideIndex].classList.add('active');
-    updateCarouselControls();
+function renderSlides() {
+    const area = document.getElementById('mediaArea');
+    area.innerHTML = `
+        <div id="slideContainer"></div>
+        <div style="margin-top:10px">
+            <button class="nav-btn" onclick="moveSlide(-1)" id="prevBtn">Prev</button>
+            <span id="counter">1/${slideData.length}</span>
+            <button class="nav-btn" onclick="moveSlide(1)" id="nextBtn">Next</button>
+        </div>
+    `;
+    const container = document.getElementById('slideContainer');
+    slideData.forEach((img, i) => {
+        const div = document.createElement('div');
+        div.className = `slide-item ${i === 0 ? 'active' : ''}`;
+        div.innerHTML = `
+            <img src="${img.url}">
+            <div class="btn-group">
+                <button class="btn-dl" onclick="downloadFile('${img.url}', '${postTitle}_Slide_${i+1}')">Tanpa Watermark</button>
+                <button class="btn-dl" style="background:#25d366" onclick="downloadFile('${img.wm}', '${postTitle}_Slide_${i+1}_WM')">Dengan Watermark</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+    updateNav();
 }
 
-function updateCarouselControls() {
-    const btnPrev = document.getElementById('btnPrev');
-    const btnNext = document.getElementById('btnNext');
-    const counter = document.getElementById('slideCounter');
-    if (counter) counter.innerText = `${currentSlideIndex + 1} / ${totalSlides}`;
-
-    if (currentSlideIndex === 0) {
-        btnPrev.style.display = 'none';
-        btnNext.style.display = totalSlides > 1 ? 'inline-block' : 'none';
-    } else if (currentSlideIndex === totalSlides - 1) {
-        btnPrev.style.display = 'inline-block';
-        btnNext.style.display = 'none';
-    } else {
-        btnPrev.style.display = 'inline-block';
-        btnNext.style.display = 'inline-block';
-    }
+function moveSlide(dir) {
+    const items = document.querySelectorAll('.slide-item');
+    items[currentSlide].classList.remove('active');
+    currentSlide += dir;
+    items[currentSlide].classList.add('active');
+    document.getElementById('counter').innerText = `${currentSlide + 1}/${slideData.length}`;
+    updateNav();
 }
 
-// 6. Main Logic (Proses Link TikTok)
+function updateNav() {
+    document.getElementById('prevBtn').style.display = currentSlide === 0 ? 'none' : 'inline-block';
+    document.getElementById('nextBtn').style.display = currentSlide === slideData.length - 1 ? 'none' : 'inline-block';
+}
+
 async function processTikTok() {
-    const urlInput = document.getElementById('tiktokUrl').value.trim();
-    const loading = document.getElementById('loading');
-    const result = document.getElementById('result');
-    const slideContainer = document.getElementById('slideContainer');
-    const actionButtons = document.getElementById('actionButtons');
-
-    if (!urlInput) { alert('Masukkan link terlebih dahulu!'); return; }
-
-    loading.classList.remove('hidden');
-    result.classList.add('hidden');
-    slideContainer.innerHTML = '';
-    currentSlideIndex = 0;
-
+    const url = document.getElementById('tiktokUrl').value;
+    if (!url) return alert("Masukkan link!");
+    
+    document.getElementById('loading').classList.remove('hidden');
+    document.getElementById('result').classList.add('hidden');
+    
     try {
-        const response = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(urlInput)}`);
-        const res = await response.json();
-        loading.classList.add('hidden');
+        const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
+        const data = (await res.json()).data;
+        postTitle = data.title || "Video";
+        
+        document.getElementById('authorName').innerText = `@${data.author.unique_id}`;
+        document.getElementById('videoTitle').innerText = postTitle;
+        
+        const mediaArea = document.getElementById('mediaArea');
+        const actionArea = document.getElementById('actionArea');
+        mediaArea.innerHTML = "";
+        actionArea.innerHTML = "";
 
-        if (res.code === 0) {
-            const data = res.data;
-            const videoTitle = data.title || 'Postingan TikTok';
-
-            document.getElementById('authorName').innerText = `@${data.author.unique_id}`;
-            document.getElementById('videoTitle').innerText = videoTitle;
-
-            // HANDLE SLIDE FOTO
-            if (data.images && data.images.length > 0) {
-                actionButtons.classList.add('hidden');
-                totalSlides = data.images.length;
-
-                const carouselWrapper = document.createElement('div');
-                carouselWrapper.className = 'carousel-container';
-
-                data.images.forEach((imgUrl, index) => {
-                    // MENGGUNAKAN wm_images dari API (Watermark asli dari sistem TikTok)
-                    const wmImgUrl = (data.wm_images && data.wm_images[index]) ? data.wm_images[index] : imgUrl;
-
-                    const item = document.createElement('div');
-                    item.className = `slide-item ${index === 0 ? 'active' : ''}`;
-                    item.innerHTML = `<img src="${imgUrl}" alt="Slide ${index + 1}">`;
-
-                    const actions = document.createElement('div');
-                    actions.className = 'slide-actions';
-
-                    const btnNoWm = document.createElement('button');
-                    btnNoWm.className = 'btn-slide-nowm';
-                    btnNoWm.innerText = 'Tanpa Watermark';
-                    btnNoWm.onclick = () => downloadFile(imgUrl, generateFileName(videoTitle, `_Slide_${index + 1}`, 'jpeg'));
-
-                    const btnWm = document.createElement('button');
-                    btnWm.className = 'btn-slide-wm';
-                    btnWm.innerText = 'Dengan Watermark';
-                    btnWm.onclick = () => downloadFile(wmImgUrl, generateFileName(videoTitle, `_Slide_${index + 1}_WM`, 'jpeg'));
-
-                    actions.appendChild(btnNoWm);
-                    actions.appendChild(btnWm);
-                    item.appendChild(actions);
-                    carouselWrapper.appendChild(item);
-                });
-
-                const nav = document.createElement('div');
-                nav.className = 'carousel-nav';
-                nav.innerHTML = `
-                    <button id="btnPrev" class="btn-nav" onclick="changeSlide(-1)">Prev</button>
-                    <span id="slideCounter" class="slide-counter">1 / ${totalSlides}</span>
-                    <button id="btnNext" class="btn-nav" onclick="changeSlide(1)">Next</button>
-                `;
-                slideContainer.appendChild(carouselWrapper);
-                slideContainer.appendChild(nav);
-                updateCarouselControls();
-            } 
-            // HANDLE VIDEO
-            else {
-                actionButtons.classList.remove('hidden');
-                document.getElementById('mediaPreview').innerHTML = `<img src="${data.cover}" alt="Thumbnail">`;
-
-                document.getElementById('btnNoWm').onclick = (e) => {
-                    e.preventDefault();
-                    downloadFile(data.play, generateFileName(videoTitle, '_NoWM', 'mp4'));
-                };
-
-                document.getElementById('btnWm').onclick = (e) => {
-                    e.preventDefault();
-                    // MENGGUNAKAN data.wmplay (Video dengan watermark asli TikTok)
-                    downloadFile(data.wmplay, generateFileName(videoTitle, '_WM', 'mp4'));
-                };
-
-                document.getElementById('btnAudio').onclick = (e) => {
-                    e.preventDefault();
-                    downloadFile(data.music, generateFileName(videoTitle, '_Audio', 'mp3'));
-                };
-            }
-
-            result.classList.remove('hidden');
-            disableBrowserDefaultOnImages();
+        if (data.images) {
+            slideData = data.images.map((url, i) => ({ url, wm: data.wm_images[i] }));
+            currentSlide = 0;
+            renderSlides();
         } else {
-            alert('Gagal mengambil data. Pastikan link TikTok valid!');
+            mediaArea.innerHTML = `<img src="${data.cover}" style="width:100%; border-radius:8px">`;
+            actionArea.innerHTML = `
+                <div class="btn-group">
+                    <button class="btn-dl" onclick="downloadFile('${data.play}', '${postTitle}_NoWM')">Tanpa Watermark</button>
+                    <button class="btn-dl" style="background:#25d366" onclick="downloadFile('${data.wmplay}', '${postTitle}_WM')">Dengan Watermark</button>
+                    <button class="btn-dl" style="background:#555" onclick="downloadFile('${data.music}', '${postTitle}_Audio')">Download MP3</button>
+                </div>
+            `;
         }
-    } catch (error) {
-        loading.classList.add('hidden');
-        alert('Terjadi kesalahan jaringan.');
-    }
+        document.getElementById('result').classList.remove('hidden');
+    } catch (e) { alert("Gagal mengambil data."); }
+    document.getElementById('loading').classList.add('hidden');
 }
